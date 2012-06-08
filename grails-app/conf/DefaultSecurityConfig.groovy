@@ -86,7 +86,7 @@ security {
 	// successHandler
 	successHandler.defaultTargetUrl = '/'
 	successHandler.alwaysUseDefault = false
-	successHandler.targetUrlParameter = ATRH.DEFAULT_TARGET_PARAMETER // 'spring-security-redirect'
+//TODO	successHandler.targetUrlParameter = ATRH.DEFAULT_TARGET_PARAMETER // 'spring-security-redirect'
 	successHandler.useReferer = false
 	successHandler.ajaxSuccessUrl = '/login/ajaxSuccess'
 

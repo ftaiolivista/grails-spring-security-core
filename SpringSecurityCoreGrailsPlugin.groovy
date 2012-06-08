@@ -76,8 +76,6 @@ import org.springframework.security.web.context.SecurityContextPersistenceFilter
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache
 import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter
 import org.springframework.security.web.session.HttpSessionEventPublisher
-import org.springframework.security.web.util.AntUrlPathMatcher
-import org.springframework.security.web.util.RegexUrlPathMatcher
 import org.springframework.web.filter.DelegatingFilterProxy
 
 import org.codehaus.groovy.grails.plugins.springsecurity.AjaxAwareAccessDeniedHandler
@@ -113,7 +111,7 @@ import org.codehaus.groovy.grails.plugins.springsecurity.WebExpressionVoter
  */
 class SpringSecurityCoreGrailsPlugin {
 
-	String version = '1.2.7.3'
+	String version = '1.2.8.0'
 	String grailsVersion = '1.2.2 > *'
 	List observe = ['controllers']
 	List loadAfter = ['controllers', 'services', 'hibernate']
@@ -329,13 +327,7 @@ to default to 'Annotation'; setting value to 'Annotation'
 				roleVoter = ref('roleVoter')
 				authenticatedVoter = ref('authenticatedVoter')
 				expressionHandler = ref('webExpressionHandler')
-				boolean lowercase = conf.controllerAnnotations.lowercase // true
-				if ('ant'.equals(conf.controllerAnnotations.matcher)) {
-					urlMatcher = new AntUrlPathMatcher(lowercase)
-				}
-				else {
-					urlMatcher = new RegexUrlPathMatcher(lowercase)
-				}
+				boolean lowercase = conf.controllerAnnotations.lowercase // true				
 				if (conf.rejectIfNoRule instanceof Boolean) {
 					rejectIfNoRule = conf.rejectIfNoRule
 				}
@@ -346,7 +338,6 @@ to default to 'Annotation'; setting value to 'Annotation'
 				roleVoter = ref('roleVoter')
 				authenticatedVoter = ref('authenticatedVoter')
 				expressionHandler = ref('webExpressionHandler')
-				urlMatcher = new AntUrlPathMatcher(true)
 				if (conf.rejectIfNoRule instanceof Boolean) {
 					rejectIfNoRule = conf.rejectIfNoRule
 				}
@@ -356,8 +347,7 @@ to default to 'Annotation'; setting value to 'Annotation'
 			objectDefinitionSource(InterceptUrlMapFilterInvocationDefinition) {
 				roleVoter = ref('roleVoter')
 				authenticatedVoter = ref('authenticatedVoter')
-				expressionHandler = ref('webExpressionHandler')
-				urlMatcher = new AntUrlPathMatcher(true)
+				expressionHandler = ref('webExpressionHandler')				
 				if (conf.rejectIfNoRule instanceof Boolean) {
 					rejectIfNoRule = conf.rejectIfNoRule
 				}
@@ -810,7 +800,6 @@ to default to 'Annotation'; setting value to 'Annotation'
 		springSecurityFilterChain(FilterChainProxy) {
 			filterChainMap = [:] // will be set in doWithApplicationContext
 			stripQueryStringFromUrls = conf.filterChain.stripQueryStringFromUrls // true
-			matcher = new AntUrlPathMatcher(true) // make into bean
 		}
 	}
 
@@ -932,7 +921,6 @@ to default to 'Annotation'; setting value to 'Annotation'
 		}
 
 		channelFilterInvocationSecurityMetadataSource(ChannelFilterInvocationSecurityMetadataSourceFactoryBean) {
-			urlMatcher = new AntUrlPathMatcher(true)
 			definition = conf.secureChannel.definition
 		}
 		channelProcessingFilter(ChannelProcessingFilter) {

@@ -31,8 +31,7 @@ public class RequestmapFilterInvocationDefinition extends AbstractFilterInvocati
 	@Override
 	protected String determineUrl(final FilterInvocation filterInvocation) {
 		HttpServletRequest request = filterInvocation.getHttpRequest();
-		String requestUrl = request.getRequestURI().substring(request.getContextPath().length());
-		return lowercaseAndStripQuerystring(requestUrl);
+		return request.getRequestURI().substring(request.getContextPath().length());
 	}
 
 	@Override

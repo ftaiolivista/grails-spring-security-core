@@ -57,7 +57,8 @@ import org.springframework.security.web.authentication.switchuser.SwitchUserGran
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.util.StringUtils;
-
+import org.springframework.security.web.util.AntPathRequestMatcher;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 /**
  * Helper methods.
  *
@@ -174,7 +175,7 @@ public final class SpringSecurityUtils {
 			return Collections.emptyList();
 		}
 
-		Collection<GrantedAuthority> authorities = authentication.getAuthorities();
+		Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 		if (authorities == null) {
 			return Collections.emptyList();
 		}
@@ -226,7 +227,7 @@ public final class SpringSecurityUtils {
 	 * @return <code>true</code> if the user is authenticated and has all the roles
 	 */
 	public static boolean ifAllGranted(final String roles) {
-		Collection<GrantedAuthority> inferred = findInferredAuthorities(getPrincipalAuthorities());
+		Collection<? extends GrantedAuthority> inferred = findInferredAuthorities(getPrincipalAuthorities());
 		return inferred.containsAll(parseAuthoritiesString(roles));
 	}
 
@@ -236,7 +237,7 @@ public final class SpringSecurityUtils {
 	 * @return <code>true</code> if the user is authenticated and has none the roles
 	 */
 	public static boolean ifNotGranted(final String roles) {
-		Collection<GrantedAuthority> inferred = findInferredAuthorities(getPrincipalAuthorities());
+		Collection<? extends GrantedAuthority> inferred = findInferredAuthorities(getPrincipalAuthorities());
 		Set<String> grantedCopy = retainAll(inferred, parseAuthoritiesString(roles));
 		return grantedCopy.isEmpty();
 	}
@@ -247,7 +248,7 @@ public final class SpringSecurityUtils {
 	 * @return <code>true</code> if the user is authenticated and has any the roles
 	 */
 	public static boolean ifAnyGranted(final String roles) {
-		Collection<GrantedAuthority> inferred = findInferredAuthorities(getPrincipalAuthorities());
+		Collection<? extends GrantedAuthority> inferred = findInferredAuthorities(getPrincipalAuthorities());
 		Set<String> grantedCopy = retainAll(inferred, parseAuthoritiesString(roles));
 		return !grantedCopy.isEmpty();
 	}
@@ -314,7 +315,9 @@ public final class SpringSecurityUtils {
 		}
 
 		// check the SavedRequest's headers
-		SavedRequest savedRequest = (SavedRequest)request.getSession().getAttribute(WebAttributes.SAVED_REQUEST);
+		HttpSessionRequestCache requestCache = getBean("requestCache");
+		
+		SavedRequest savedRequest = (SavedRequest) requestCache.getRequest(request, null);
 		if (savedRequest != null) {
 			return !savedRequest.getHeaderValues(ajaxHeaderName).isEmpty();
 		}
@@ -460,8 +463,8 @@ public final class SpringSecurityUtils {
 		getConfiguredOrderedFilters().put(order, filter);
 		FilterChainProxy filterChain = getBean("springSecurityFilterChain");
 		filterChain.setFilterChainMap(Collections.singletonMap(
-				filterChain.getMatcher().getUniversalMatchPattern(),
-				new ArrayList<Filter>(getConfiguredOrderedFilters().values())));
+				(org.springframework.security.web.util.RequestMatcher) new AntPathRequestMatcher("/**"),
+				(List<Filter>) new ArrayList<Filter>(getConfiguredOrderedFilters().values())));
 	}
 
 	/**
@@ -625,10 +628,10 @@ public final class SpringSecurityUtils {
 		return config;
 	}
 
-	private static Collection<GrantedAuthority> findInferredAuthorities(
+	private static Collection<? extends GrantedAuthority> findInferredAuthorities(
 			final Collection<GrantedAuthority> granted) {
-		RoleHierarchy roleHierarchy = getBean("roleHierarchy");
-		Collection<GrantedAuthority> reachable = roleHierarchy.getReachableGrantedAuthorities(granted);
+		RoleHierarchy roleHierarchy = getBean("roleHierarchy");		
+		Collection<? extends GrantedAuthority> reachable = roleHierarchy.getReachableGrantedAuthorities(granted);
 		if (reachable == null) {
 			return Collections.emptyList();
 		}

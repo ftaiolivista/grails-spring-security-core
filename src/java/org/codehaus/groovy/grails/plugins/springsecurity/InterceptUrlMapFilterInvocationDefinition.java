@@ -32,7 +32,7 @@ public class InterceptUrlMapFilterInvocationDefinition extends AbstractFilterInv
 	protected String determineUrl(final FilterInvocation filterInvocation) {
 		HttpServletRequest request = filterInvocation.getHttpRequest();
 		String requestUrl = request.getRequestURI().substring(request.getContextPath().length());
-		return lowercaseAndStripQuerystring(requestUrl);
+		return requestUrl;
 	}
 
 	@Override

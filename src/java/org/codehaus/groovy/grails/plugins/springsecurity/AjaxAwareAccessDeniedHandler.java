@@ -30,6 +30,7 @@ import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.util.Assert;
+import org.springframework.security.web.savedrequest.RequestCache;
 
 /**
  * @author <a href='mailto:burt@burtbeckwith.com'>Burt Beckwith</a>
@@ -40,6 +41,7 @@ public class AjaxAwareAccessDeniedHandler implements AccessDeniedHandler, Initia
 	private String ajaxErrorPage;
 	private PortResolver portResolver;
 	private AuthenticationTrustResolver authenticationTrustResolver;
+	private RequestCache _requestCache;
 
 	/**
 	 * {@inheritDoc}
@@ -53,7 +55,7 @@ public class AjaxAwareAccessDeniedHandler implements AccessDeniedHandler, Initia
 		if (e != null && isLoggedIn() && authenticationTrustResolver.isRememberMe(getAuthentication())) {
 			// user has a cookie but is getting bounced because of IS_AUTHENTICATED_FULLY,
 			// so Acegi won't save the original request
-			request.getSession().setAttribute(WebAttributes.SAVED_REQUEST, new DefaultSavedRequest(request, portResolver));
+			_requestCache.saveRequest(request, response);
 		}
 
 		if (response.isCommitted()) {

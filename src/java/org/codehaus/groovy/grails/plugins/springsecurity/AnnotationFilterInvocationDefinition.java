@@ -44,6 +44,7 @@ import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.security.web.util.AntPathRequestMatcher;
 
 /**
  * A {@link FilterInvocationSecurityMetadataSource} that uses rules defined with Controller annotations
@@ -101,7 +102,7 @@ public class AnnotationFilterInvocationDefinition extends AbstractFilterInvocati
 			url = requestUrl;
 		}
 
-		return lowercaseAndStripQuerystring(url);
+		return url;
 	}
 
 	protected String findGrailsUrl(final UrlMappingInfo mapping) {
@@ -238,7 +239,7 @@ public class AnnotationFilterInvocationDefinition extends AbstractFilterInvocati
 
 		Collection<ConfigAttribute> configAttributes = buildConfigAttributes(tokens);
 
-		Object key = getUrlMatcher().compile(fullPattern);
+		AntPathRequestMatcher key = new AntPathRequestMatcher(fullPattern);
 		Collection<ConfigAttribute> replaced = storeMapping(key, configAttributes);
 		if (replaced != null) {
 			_log.warn("replaced rule for '" + key + "' with tokens " + replaced
