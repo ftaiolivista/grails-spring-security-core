@@ -184,7 +184,7 @@ public class AnnotationFilterInvocationDefinition extends AbstractFilterInvocati
 		compileStaticRules(staticRules);
 
 		if (_log.isTraceEnabled()) {
-			_log.trace("configs: " + getConfigAttributeMap());
+//			_log.trace("configs: " + getConfigAttributeMap());
 		}
 	}
 

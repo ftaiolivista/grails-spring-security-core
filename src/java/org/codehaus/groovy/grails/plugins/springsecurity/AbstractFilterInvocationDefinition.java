@@ -34,7 +34,7 @@ import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.access.vote.AuthenticatedVoter;
 import org.springframework.security.access.vote.RoleVoter;
 import org.springframework.security.web.FilterInvocation;
-import org.springframework.security.web.access.expression.WebSecurityExpressionHandler;
+import org.springframework.security.access.expression.SecurityExpressionHandler;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
 import org.springframework.security.web.util.AntPathRequestMatcher;
 import org.springframework.security.web.util.RequestMatcher;
@@ -51,7 +51,7 @@ public abstract class AbstractFilterInvocationDefinition
 	private boolean _rejectIfNoRule;
 	private RoleVoter _roleVoter;
 	private AuthenticatedVoter _authenticatedVoter;
-	private WebSecurityExpressionHandler _expressionHandler;
+	private SecurityExpressionHandler _expressionHandler;
 
 	private final Map<AntPathRequestMatcher, Collection<ConfigAttribute>> _compiled = new LinkedHashMap<AntPathRequestMatcher, Collection<ConfigAttribute>>();
 
@@ -182,6 +182,7 @@ public abstract class AbstractFilterInvocationDefinition
 	 * keyed by compiled patterns
 	 */
 	public Map<AntPathRequestMatcher, Collection<ConfigAttribute>> getConfigAttributeMap() {
+		System.out.println("Dimensione mappa compilata "+_compiled.size());
 		return Collections.unmodifiableMap(_compiled);
 	}
 
@@ -243,6 +244,12 @@ public abstract class AbstractFilterInvocationDefinition
 
 	protected Collection<ConfigAttribute> storeMapping(final AntPathRequestMatcher key,
 			final Collection<ConfigAttribute> configAttributes) {
+		
+		System.out.println("Url Key "+key.getPattern() );
+		for(ConfigAttribute ca : configAttributes){
+			System.out.println("Attributo "+ca.getAttribute() );
+		}
+		
 		return _compiled.put(key, configAttributes);
 	}
 
@@ -291,10 +298,10 @@ public abstract class AbstractFilterInvocationDefinition
 	 * Dependency injection for the expression handler.
 	 * @param handler the handler
 	 */
-	public void setExpressionHandler(final WebSecurityExpressionHandler handler) {
+	public void setExpressionHandler(final SecurityExpressionHandler handler) {
 		_expressionHandler = handler;
 	}
-	protected WebSecurityExpressionHandler getExpressionHandler() {
+	protected SecurityExpressionHandler getExpressionHandler() {
 		return _expressionHandler;
 	}
 	

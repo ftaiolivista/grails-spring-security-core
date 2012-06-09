@@ -51,7 +51,7 @@ import org.springframework.security.web.access.channel.InsecureChannelProcessor
 import org.springframework.security.web.access.channel.RetryWithHttpEntryPoint
 import org.springframework.security.web.access.channel.RetryWithHttpsEntryPoint
 import org.springframework.security.web.access.channel.SecureChannelProcessor
-import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler
+import org.springframework.security.access.expression.SecurityExpressionHandler
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint
@@ -105,6 +105,8 @@ import org.codehaus.groovy.grails.plugins.springsecurity.SecurityFilterPosition
 import org.codehaus.groovy.grails.plugins.springsecurity.SecurityRequestHolder
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.codehaus.groovy.grails.plugins.springsecurity.WebExpressionVoter
+import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler
+import org.springframework.security.web.util.AntPathRequestMatcher
 
 /**
  * @author <a href='mailto:burt@burtbeckwith.com'>Burt Beckwith</a>
@@ -582,7 +584,7 @@ to default to 'Annotation'; setting value to 'Annotation'
 			}
 		}
 		else {
-			filterChainMap[filterChain.matcher.universalMatchPattern] = new ArrayList(allConfiguredFilters.values()) // /**
+			filterChainMap[new AntPathRequestMatcher("/**")] = new ArrayList(allConfiguredFilters.values()) // /**
 		}
 
 		filterChain.filterChainMap = filterChainMap
@@ -799,7 +801,7 @@ to default to 'Annotation'; setting value to 'Annotation'
 	private configureFilterChain = { conf ->
 		springSecurityFilterChain(FilterChainProxy) {
 			filterChainMap = [:] // will be set in doWithApplicationContext
-			stripQueryStringFromUrls = conf.filterChain.stripQueryStringFromUrls // true
+//			stripQueryStringFromUrls = conf.filterChain.stripQueryStringFromUrls // true
 		}
 	}
 
@@ -971,12 +973,11 @@ to default to 'Annotation'; setting value to 'Annotation'
 		}
 
 		authenticationDetailsSource(WebAuthenticationDetailsSource) {
-			clazz = conf.authenticationDetails.authClass // WebAuthenticationDetails
+//			clazz = conf.authenticationDetails.authClass // WebAuthenticationDetails
 		}
 
 		requestCache(HttpSessionRequestCache) {
 			portResolver = ref('portResolver')
-			justUseSavedRequestOnGet = conf.requestCache.onlyOnGet // false
 			createSessionAllowed = conf.requestCache.createSession // true
 		}
 

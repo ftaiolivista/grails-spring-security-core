@@ -26,8 +26,8 @@ import org.springframework.security.access.SecurityConfig
 import org.springframework.security.access.vote.AuthenticatedVoter
 import org.springframework.security.access.vote.RoleVoter
 import org.springframework.security.web.FilterInvocation
+import org.springframework.security.access.expression.SecurityExpressionHandler
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler
-
 /**
  * @author <a href='mailto:burt@burtbeckwith.com'>Burt Beckwith</a>
  */

@@ -6,3 +6,6 @@ stacktrace.log
 /testapps.config.groovy
 /plugin.xml
 .settings/org.eclipse.core.resources.prefs
+web-app
+grails-app/conf/UrlMappings.groovy
+grails-app/i18n/messages.properties
