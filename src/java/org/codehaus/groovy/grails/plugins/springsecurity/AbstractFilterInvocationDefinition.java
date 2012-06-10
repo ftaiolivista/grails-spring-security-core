@@ -34,13 +34,14 @@ import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.access.vote.AuthenticatedVoter;
 import org.springframework.security.access.vote.RoleVoter;
 import org.springframework.security.web.FilterInvocation;
-import org.springframework.security.web.access.expression.WebSecurityExpressionHandler;
+import org.springframework.security.access.expression.SecurityExpressionHandler;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
 import org.springframework.security.web.util.AntPathRequestMatcher;
 import org.springframework.security.web.util.RequestMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
+import org.springframework.util.AntPathMatcher;
 
 /**
  * @author <a href='mailto:burt@burtbeckwith.com'>Burt Beckwith</a>
@@ -51,7 +52,7 @@ public abstract class AbstractFilterInvocationDefinition
 	private boolean _rejectIfNoRule;
 	private RoleVoter _roleVoter;
 	private AuthenticatedVoter _authenticatedVoter;
-	private WebSecurityExpressionHandler _expressionHandler;
+	private SecurityExpressionHandler _expressionHandler;
 
 	private final Map<AntPathRequestMatcher, Collection<ConfigAttribute>> _compiled = new LinkedHashMap<AntPathRequestMatcher, Collection<ConfigAttribute>>();
 
@@ -106,11 +107,14 @@ public abstract class AbstractFilterInvocationDefinition
 		AntPathRequestMatcher configAttributePattern = null;
 
 		boolean stopAtFirstMatch = stopAtFirstMatch();
+		
+		AntPathMatcher specificityMatcher = new AntPathMatcher();
+		
 		for (Map.Entry<AntPathRequestMatcher, Collection<ConfigAttribute>> entry : _compiled.entrySet()) {
 			AntPathRequestMatcher pattern = entry.getKey();
 			if (pattern.matches(url)) {
-				// TODO this assumes Ant matching, not valid for regex
-				if (configAttributes == null || configAttributePattern.equals(pattern)) {
+				// TODO this assumes Ant matching, not valid for regex				 
+				if (configAttributes == null || specificityMatcher.match(configAttributePattern.getPattern(), pattern.getPattern())) {
 					configAttributes = entry.getValue();
 					configAttributePattern = pattern;
 					if (_log.isTraceEnabled()) {
@@ -182,6 +186,7 @@ public abstract class AbstractFilterInvocationDefinition
 	 * keyed by compiled patterns
 	 */
 	public Map<AntPathRequestMatcher, Collection<ConfigAttribute>> getConfigAttributeMap() {
+		System.out.println("Dimensione mappa compilata "+_compiled.size());
 		return Collections.unmodifiableMap(_compiled);
 	}
 
@@ -243,6 +248,12 @@ public abstract class AbstractFilterInvocationDefinition
 
 	protected Collection<ConfigAttribute> storeMapping(final AntPathRequestMatcher key,
 			final Collection<ConfigAttribute> configAttributes) {
+		
+		System.out.println("Url Key "+key.getPattern() );
+		for(ConfigAttribute ca : configAttributes){
+			System.out.println("Attributo "+ca.getAttribute() );
+		}
+		
 		return _compiled.put(key, configAttributes);
 	}
 
@@ -291,10 +302,10 @@ public abstract class AbstractFilterInvocationDefinition
 	 * Dependency injection for the expression handler.
 	 * @param handler the handler
 	 */
-	public void setExpressionHandler(final WebSecurityExpressionHandler handler) {
+	public void setExpressionHandler(final SecurityExpressionHandler handler) {
 		_expressionHandler = handler;
 	}
-	protected WebSecurityExpressionHandler getExpressionHandler() {
+	protected SecurityExpressionHandler getExpressionHandler() {
 		return _expressionHandler;
 	}
 	

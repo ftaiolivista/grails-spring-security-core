@@ -292,6 +292,7 @@ public final class SpringSecurityUtils {
 	 * Force a reload of the security configuration.
 	 */
 	public static void reloadSecurityConfig() {
+		System.out.println("###### RELOAD SECURITY CONFIG");
 		mergeConfig(ReflectionUtils.getSecurityConfig(), "DefaultSecurityConfig");
 	}
 

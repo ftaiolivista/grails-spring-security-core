@@ -54,23 +54,23 @@ class IpAddressFilterTests extends GroovyTestCase {
 		def chain = [doFilter: { req, res -> chainCount++ }] as FilterChain
 
 		request.remoteAddr = '127.0.0.1'
-		request.requestURI = '/foo/bar?x=123'
+		request.servletPath = '/foo/bar?x=123'
 		_filter.doFilter request, response, chain
 
 		request.remoteAddr = '10.10.111.222'
-		request.requestURI = '/bar/foo?x=123'
+		request.servletPath = '/bar/foo?x=123'
 		_filter.doFilter request, response, chain
 
 		request.remoteAddr = '10.10.200.63'
-		request.requestURI = '/wahoo/list'
+		request.servletPath = '/wahoo/list'
 		_filter.doFilter request, response, chain
 
 		request.remoteAddr = '63.161.169.137'
-		request.requestURI = '/my/united/states/of/whatever'
+		request.servletPath = '/my/united/states/of/whatever'
 		_filter.doFilter request, response, chain
 
 		request.remoteAddr = '192.168.1.123'
-		request.requestURI = '/masked/shouldsucceed'
+		request.servletPath = '/masked/shouldsucceed'
 		_filter.doFilter request, response, chain
 
 		assertEquals 5, chainCount
@@ -90,22 +90,22 @@ class IpAddressFilterTests extends GroovyTestCase {
 
 		request.remoteAddr = '63.161.169.137'
 
-		request.requestURI = '/foo/bar?x=123'
+		request.servletPath = '/foo/bar?x=123'
 		response = new MockHttpServletResponse()
 		_filter.doFilter request, response, chain
 		assertEquals 404, response.status
 
-		request.requestURI = '/bar/foo?x=123'
+		request.servletPath = '/bar/foo?x=123'
 		response = new MockHttpServletResponse()
 		_filter.doFilter request, response, chain
 		assertEquals 404, response.status
 
-		request.requestURI = '/wahoo/list'
+		request.servletPath = '/wahoo/list'
 		response = new MockHttpServletResponse()
 		_filter.doFilter request, response, chain
 		assertEquals 404, response.status
 
-		request.requestURI = '/masked/shouldfail'
+		request.servletPath = '/masked/shouldfail'
 		response = new MockHttpServletResponse()
 		_filter.doFilter request, response, chain
 		assertEquals 404, response.status
@@ -127,7 +127,7 @@ class IpAddressFilterTests extends GroovyTestCase {
 
 		request.remoteAddr = 'fa:db8:85a3::8a2e:370:7334'
 
-		request.requestURI = '/masked/bar?x=123'
+		request.servletPath = '/masked/bar?x=123'
 		response = new MockHttpServletResponse()
 		_filter.doFilter request, response, chain
 		assertEquals 404, response.status

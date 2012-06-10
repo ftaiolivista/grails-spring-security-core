@@ -69,7 +69,7 @@ public class AnnotationFilterInvocationDefinition extends AbstractFilterInvocati
 
 		GrailsWebRequest existingRequest = WebUtils.retrieveGrailsWebRequest();
 
-		String requestUrl = request.getRequestURI().substring(request.getContextPath().length());
+		String requestUrl = request.getServletPath().substring(request.getContextPath().length());
 
 		String url = null;
 		try {
@@ -184,7 +184,7 @@ public class AnnotationFilterInvocationDefinition extends AbstractFilterInvocati
 		compileStaticRules(staticRules);
 
 		if (_log.isTraceEnabled()) {
-			_log.trace("configs: " + getConfigAttributeMap());
+//			_log.trace("configs: " + getConfigAttributeMap());
 		}
 	}
 
