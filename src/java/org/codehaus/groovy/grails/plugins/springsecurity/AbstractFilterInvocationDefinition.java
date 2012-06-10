@@ -41,6 +41,7 @@ import org.springframework.security.web.util.RequestMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
+import org.springframework.util.AntPathMatcher;
 
 /**
  * @author <a href='mailto:burt@burtbeckwith.com'>Burt Beckwith</a>
@@ -106,11 +107,14 @@ public abstract class AbstractFilterInvocationDefinition
 		AntPathRequestMatcher configAttributePattern = null;
 
 		boolean stopAtFirstMatch = stopAtFirstMatch();
+		
+		AntPathMatcher specificityMatcher = new AntPathMatcher();
+		
 		for (Map.Entry<AntPathRequestMatcher, Collection<ConfigAttribute>> entry : _compiled.entrySet()) {
 			AntPathRequestMatcher pattern = entry.getKey();
 			if (pattern.matches(url)) {
-				// TODO this assumes Ant matching, not valid for regex
-				if (configAttributes == null || configAttributePattern.equals(pattern)) {
+				// TODO this assumes Ant matching, not valid for regex				 
+				if (configAttributes == null || specificityMatcher.match(configAttributePattern.getPattern(), pattern.getPattern())) {
 					configAttributes = entry.getValue();
 					configAttributePattern = pattern;
 					if (_log.isTraceEnabled()) {

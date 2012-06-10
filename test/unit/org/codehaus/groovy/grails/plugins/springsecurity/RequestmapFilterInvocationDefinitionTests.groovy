@@ -132,10 +132,10 @@ class RequestmapFilterInvocationDefinitionTests extends GrailsUnitTestCase {
 //		def chain = new MockFilterChain()
 //		request.contextPath = '/context'
 //
-//		request.requestURI = '/context/foo'
+//		request.servletPath = '/context/foo'
 //		assertEquals '/foo', _fid.determineUrl(new FilterInvocation(request, response, chain))
 //
-//		request.requestURI = '/context/fOo/Bar?x=1&y=2'
+//		request.servletPath = '/context/fOo/Bar?x=1&y=2'
 //		assertEquals '/foo/bar', _fid.determineUrl(new FilterInvocation(request, response, chain))
 //	}
 
