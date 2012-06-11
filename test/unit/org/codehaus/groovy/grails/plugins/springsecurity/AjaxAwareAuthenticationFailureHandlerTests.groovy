@@ -19,6 +19,13 @@ import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.web.RedirectStrategy
+import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache
+import org.springframework.web.context.WebApplicationContext
+import javax.servlet.ServletContext
+import org.springframework.mock.web.MockServletContext
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 /**
  * @author <a href='mailto:burt@burtbeckwith.com'>Burt Beckwith</a>
@@ -26,6 +33,26 @@ import org.springframework.security.web.RedirectStrategy
 class AjaxAwareAuthenticationFailureHandlerTests extends GroovyTestCase {
 
 	private final _handler = new AjaxAwareAuthenticationFailureHandler()
+	
+	/**
+	* {@inheritDoc}
+	* @see junit.framework.TestCase#setUp()
+	*/
+   @Override
+   protected void setUp() {
+	   super.setUp()
+
+	   ServletContext servletContext = new MockServletContext()
+	   def app = new DefaultGrailsApplication()
+	   def requestCache = new HttpSessionRequestCache(createSessionAllowed: true)
+	   def beans = [(GrailsApplication.APPLICATION_ID): app, 'requestCache': requestCache]
+	   def ctx = [getBean: { String name, Class<?> c = null -> beans[name] },
+				  containsBean: { String name -> beans.containsKey(name) } ] as WebApplicationContext
+	   servletContext.setAttribute WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ctx
+	   app.mainContext = ctx
+	   SpringSecurityUtils.application = app
+
+   }
 
 	void testOnAuthenticationFailureNotAjax() {
 

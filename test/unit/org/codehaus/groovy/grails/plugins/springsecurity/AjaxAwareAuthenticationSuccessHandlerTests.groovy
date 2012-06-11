@@ -17,11 +17,18 @@ package org.codehaus.groovy.grails.plugins.springsecurity
 import org.codehaus.groovy.grails.commons.ConfigurationHolder as CH
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.RedirectStrategy
 import org.springframework.security.web.savedrequest.RequestCache
 import org.springframework.security.web.savedrequest.SavedRequest
+import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache
+import org.springframework.web.context.WebApplicationContext
+import javax.servlet.ServletContext
+import org.springframework.mock.web.MockServletContext
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 
 /**
  * @author <a href='mailto:burt@burtbeckwith.com'>Burt Beckwith</a>
@@ -42,6 +49,17 @@ class AjaxAwareAuthenticationSuccessHandlerTests extends GroovyTestCase {
 		super.setUp()
 		_handler.defaultTargetUrl = DEFAULT_TARGET_URL
 		_handler.ajaxSuccessUrl = AJAX_SUCCESS_URL
+		
+		ServletContext servletContext = new MockServletContext()
+		def app = new DefaultGrailsApplication()
+		def requestCache = new HttpSessionRequestCache(createSessionAllowed: true)
+		def beans = [(GrailsApplication.APPLICATION_ID): app, 'requestCache': requestCache]
+		def ctx = [getBean: { String name, Class<?> c = null -> beans[name] },
+				   containsBean: { String name -> beans.containsKey(name) } ] as WebApplicationContext
+		servletContext.setAttribute WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ctx
+		app.mainContext = ctx
+//		AH.application = app
+		SpringSecurityUtils.application = app
 
 		def config = new ConfigObject()
 		config.ajaxHeader = 'ajaxHeader'

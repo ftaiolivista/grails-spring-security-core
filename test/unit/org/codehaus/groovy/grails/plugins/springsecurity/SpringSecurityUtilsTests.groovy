@@ -25,6 +25,13 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.GrantedAuthorityImpl
 import org.springframework.security.web.PortResolverImpl
 import org.springframework.security.web.savedrequest.DefaultSavedRequest
+import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache
+import org.springframework.web.context.WebApplicationContext
+import javax.servlet.ServletContext
+import org.springframework.mock.web.MockServletContext
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 /**
  * Unit tests for SpringSecurityUtils.
@@ -34,6 +41,7 @@ import org.springframework.security.web.savedrequest.DefaultSavedRequest
 class SpringSecurityUtilsTests extends GroovyTestCase {
 
 	private final application = new FakeApplication()
+	private final requestCache = new HttpSessionRequestCache(createSessionAllowed: true)
 
 	/**
 	 * {@inheritDoc}
@@ -43,6 +51,16 @@ class SpringSecurityUtilsTests extends GroovyTestCase {
 	protected void setUp() {
 		super.setUp()
 		ReflectionUtils.application = application
+		
+		ServletContext servletContext = new MockServletContext()
+		def app = new DefaultGrailsApplication()
+		def beans = [(GrailsApplication.APPLICATION_ID): app, 'requestCache': requestCache]
+		def ctx = [getBean: { String name, Class<?> c = null -> beans[name] },
+				   containsBean: { String name -> beans.containsKey(name) } ] as WebApplicationContext
+		servletContext.setAttribute WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ctx
+		app.mainContext = ctx
+		SpringSecurityUtils.application = app
+		
 	}
 
 	/**
@@ -156,19 +174,17 @@ class SpringSecurityUtilsTests extends GroovyTestCase {
 	void testIsAjaxUsingSavedRequestFalse() {
 
 		def request = new MockHttpServletRequest()
-		def savedRequest = new DefaultSavedRequest(request, new PortResolverImpl())
-		request.session.setAttribute(DefaultSavedRequest.SPRING_SECURITY_SAVED_REQUEST_KEY, savedRequest)
-
+//		def savedRequest = new DefaultSavedRequest(request, new PortResolverImpl())
+		//request.session.setAttribute(DefaultSavedRequest.SPRING_SECURITY_SAVED_REQUEST_KEY, savedRequest)
+		requestCache.saveRequest(request, null)
 		assertFalse SpringSecurityUtils.isAjax(request)
 	}
 
 	void testIsAjaxUsingSavedRequestTrue() {
 
 		def request = new MockHttpServletRequest()
-		request.addHeader 'X-Requested-With', 'true'
-		def savedRequest = new DefaultSavedRequest(request, new PortResolverImpl())
-		request.session.setAttribute(DefaultSavedRequest.SPRING_SECURITY_SAVED_REQUEST_KEY, savedRequest)
-
+		request.addHeader 'X-Requested-With', 'true'		
+		requestCache.saveRequest(request, null)		
 		assertTrue SpringSecurityUtils.isAjax(request)
 	}
 

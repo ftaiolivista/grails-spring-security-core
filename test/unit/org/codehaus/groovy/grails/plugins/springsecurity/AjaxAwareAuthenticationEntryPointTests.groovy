@@ -17,6 +17,13 @@ package org.codehaus.groovy.grails.plugins.springsecurity
 import org.codehaus.groovy.grails.commons.ConfigurationHolder as CH
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
+import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache
+import org.springframework.web.context.WebApplicationContext
+import javax.servlet.ServletContext
+import org.springframework.mock.web.MockServletContext
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
+import org.codehaus.groovy.grails.commons.GrailsApplication
 
 /**
  * Unit tests for WithAjaxAuthenticationProcessingFilterEntryPoint.
@@ -38,6 +45,18 @@ class AjaxAwareAuthenticationEntryPointTests extends GroovyTestCase {
 	@Override
 	protected void setUp() {
 		super.setUp()
+		
+		ServletContext servletContext = new MockServletContext()
+		def app = new DefaultGrailsApplication()
+		def requestCache = new HttpSessionRequestCache(createSessionAllowed: true)
+		def beans = [(GrailsApplication.APPLICATION_ID): app, 'requestCache': requestCache]
+		def ctx = [getBean: { String name, Class<?> c = null -> beans[name] },
+				   containsBean: { String name -> beans.containsKey(name) } ] as WebApplicationContext
+		servletContext.setAttribute WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ctx
+		app.mainContext = ctx
+//		AH.application = app
+		SpringSecurityUtils.application = app
+		
 		_entryPoint.useForward = true
 		_entryPoint.loginFormUrl = _loginFormUrl
 		_entryPoint.ajaxLoginFormUrl = _ajaxLoginFormUrl

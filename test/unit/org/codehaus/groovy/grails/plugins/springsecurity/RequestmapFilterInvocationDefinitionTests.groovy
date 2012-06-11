@@ -23,8 +23,9 @@ import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.security.access.vote.AuthenticatedVoter
 import org.springframework.security.access.vote.RoleVoter
 import org.springframework.security.web.FilterInvocation
-import org.springframework.security.access.expression.SecurityExpressionHandler
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler
+import org.springframework.security.web.util.AntPathRequestMatcher
+import org.springframework.security.access.SecurityConfig
 
 /**
  * Unit tests for RequestmapFilterInvocationDefinition.
@@ -64,80 +65,63 @@ class RequestmapFilterInvocationDefinitionTests extends GrailsUnitTestCase {
 		assertEquals(['hasAnyRole("ROLE_1","ROLE_2")'], _fid.split('hasAnyRole("ROLE_1","ROLE_2")'))
 	}
 
-//	void testLoadRequestmaps() {
-//		def requestMapConfig = SpringSecurityUtils.securityConfig.requestMap
-//		requestMapConfig.className = TestRequestmap.name
-//		requestMapConfig.urlField = 'urlPattern'
-//		requestMapConfig.configAttributeField = 'rolePattern'
-//
-//		def instances = [new TestRequestmap(urlPattern: 'path1', rolePattern: 'config1'),
-//		                 new TestRequestmap(urlPattern: 'path2', rolePattern: 'config2'),
-//		                 new TestRequestmap(urlPattern: 'path3', rolePattern: 'config3')]
-//		mockDomain TestRequestmap, instances
-//
-//		def requestmaps = _fid.loadRequestmaps()
-//		assertEquals 3, requestmaps.size()
-//		assertEquals 'config1', requestmaps.path1
-//		assertEquals 'config2', requestmaps.path2
-//		assertEquals 'config3', requestmaps.path3
-//	}
+	void testStoreMapping() {
 
-	void testAfterPropertiesSet() {
-		assertEquals 'url matcher is required', shouldFail(IllegalArgumentException) {
-			_fid.afterPropertiesSet()
-		}
+		assertEquals 0, _fid.configAttributeMap.size()
 
-//		_fid.urlMatcher = new AntUrlPathMatcher()
+		_fid.storeMapping new AntPathRequestMatcher('/foo/bar'), [new SecurityConfig('ROLE_ADMIN')]
+		assertEquals 1, _fid.configAttributeMap.size()
 
-		_fid.afterPropertiesSet()
+		_fid.storeMapping new AntPathRequestMatcher('/foo/bar'), [new SecurityConfig('ROLE_USER')]
+		assertEquals 1, _fid.configAttributeMap.size()
+
+		_fid.storeMapping new AntPathRequestMatcher('/other/path'), [new SecurityConfig('ROLE_SUPERUSER')]
+		assertEquals 2, _fid.configAttributeMap.size()
 	}
 
-//	void testReset() {
-//		_fid = new TestRequestmapFilterInvocationDefinition()
-//		_fid.urlMatcher = new AntUrlPathMatcher()
-//		_fid.roleVoter = new RoleVoter()
-//		_fid.authenticatedVoter = new AuthenticatedVoter()
-//		_fid.expressionHandler = new DefaultWebSecurityExpressionHandler()
-//
-//		assertEquals 0, _fid.configAttributeMap.size()
-//
-//		_fid.reset()
-//
-//		assertEquals 2, _fid.configAttributeMap.size()
-//	}
+	void testReset() {
+		_fid = new TestRequestmapFilterInvocationDefinition()
+		_fid.roleVoter = new RoleVoter()
+		_fid.authenticatedVoter = new AuthenticatedVoter()
+		_fid.expressionHandler = new DefaultWebSecurityExpressionHandler()
 
-//	void testInitialize() {
-//		_fid = new TestRequestmapFilterInvocationDefinition()
-//		_fid.urlMatcher = new AntUrlPathMatcher()
-//		_fid.roleVoter = new RoleVoter()
-//		_fid.authenticatedVoter = new AuthenticatedVoter()
-//		_fid.expressionHandler = new DefaultWebSecurityExpressionHandler()
-//
-//		assertEquals 0, _fid.configAttributeMap.size()
-//
-//		_fid.initialize()
-//		assertEquals 2, _fid.configAttributeMap.size()
-//
-//		_fid.resetConfigs()
-//
-//		_fid.initialize()
-//		assertEquals 0, _fid.configAttributeMap.size()
-//	}
+		assertEquals 0, _fid.configAttributeMap.size()
 
-//	void testDetermineUrl() {
-//		_fid.urlMatcher = new AntUrlPathMatcher()
-//
-//		def request = new MockHttpServletRequest()
-//		def response = new MockHttpServletResponse()
-//		def chain = new MockFilterChain()
-//		request.contextPath = '/context'
-//
-//		request.servletPath = '/context/foo'
-//		assertEquals '/foo', _fid.determineUrl(new FilterInvocation(request, response, chain))
-//
-//		request.servletPath = '/context/fOo/Bar?x=1&y=2'
-//		assertEquals '/foo/bar', _fid.determineUrl(new FilterInvocation(request, response, chain))
-//	}
+		_fid.reset()
+
+		assertEquals 2, _fid.configAttributeMap.size()
+	}
+
+	void testInitialize() {
+		_fid = new TestRequestmapFilterInvocationDefinition()
+		_fid.roleVoter = new RoleVoter()
+		_fid.authenticatedVoter = new AuthenticatedVoter()
+		_fid.expressionHandler = new DefaultWebSecurityExpressionHandler()
+
+		assertEquals 0, _fid.configAttributeMap.size()
+
+		_fid.initialize()
+		assertEquals 2, _fid.configAttributeMap.size()
+
+		_fid.resetConfigs()
+
+		_fid.initialize()
+		assertEquals 0, _fid.configAttributeMap.size()
+	}
+
+	void testDetermineUrl() {
+
+		def request = new MockHttpServletRequest()
+		def response = new MockHttpServletResponse()
+		def chain = new MockFilterChain()
+		request.contextPath = '/context'
+
+		request.servletPath = '/context/foo'
+		assertEquals '/foo', _fid.determineUrl(new FilterInvocation(request, response, chain))
+
+		request.servletPath = '/context/fOo/Bar?x=1&y=2'
+		assertEquals '/fOo/Bar?x=1&y=2', _fid.determineUrl(new FilterInvocation(request, response, chain))
+	}
 
 	void testSupports() {
 		assertTrue _fid.supports(FilterInvocation)

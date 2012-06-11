@@ -29,6 +29,7 @@ import org.springframework.security.web.FilterInvocation
 import org.springframework.security.access.expression.SecurityExpressionHandler
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler
 import org.springframework.security.web.util.AntPathRequestMatcher
+import org.springframework.security.access.SecurityConfig
 
 /**
  * @author <a href='mailto:burt@burtbeckwith.com'>Burt Beckwith</a>
@@ -54,13 +55,13 @@ class InterceptUrlMapFilterInvocationDefinitionTests extends GroovyTestCase {
 
 		assertEquals 0, _fid.configAttributeMap.size()
 
-		_fid.storeMapping new AntPathRequestMatcher('/foo/bar'), ['ROLE_ADMIN']
+		_fid.storeMapping new AntPathRequestMatcher('/foo/bar'), [new SecurityConfig('ROLE_ADMIN')]
 		assertEquals 1, _fid.configAttributeMap.size()
 
-		_fid.storeMapping new AntPathRequestMatcher('/foo/bar'), ['ROLE_USER']
+		_fid.storeMapping new AntPathRequestMatcher('/foo/bar'), [new SecurityConfig('ROLE_USER')]
 		assertEquals 1, _fid.configAttributeMap.size()
 
-		_fid.storeMapping new AntPathRequestMatcher('/other/path'), ['ROLE_SUPERUSER']
+		_fid.storeMapping new AntPathRequestMatcher('/other/path'), [new SecurityConfig('ROLE_SUPERUSER')]
 		assertEquals 2, _fid.configAttributeMap.size()
 	}
 
