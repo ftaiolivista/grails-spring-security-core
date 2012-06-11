@@ -23,6 +23,7 @@ import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.security.access.vote.AuthenticatedVoter
 import org.springframework.security.access.vote.RoleVoter
 import org.springframework.security.web.FilterInvocation
+import org.springframework.security.access.expression.SecurityExpressionHandler
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler
 
 /**
@@ -131,10 +132,10 @@ class RequestmapFilterInvocationDefinitionTests extends GrailsUnitTestCase {
 //		def chain = new MockFilterChain()
 //		request.contextPath = '/context'
 //
-//		request.requestURI = '/context/foo'
+//		request.servletPath = '/context/foo'
 //		assertEquals '/foo', _fid.determineUrl(new FilterInvocation(request, response, chain))
 //
-//		request.requestURI = '/context/fOo/Bar?x=1&y=2'
+//		request.servletPath = '/context/fOo/Bar?x=1&y=2'
 //		assertEquals '/foo/bar', _fid.determineUrl(new FilterInvocation(request, response, chain))
 //	}
 

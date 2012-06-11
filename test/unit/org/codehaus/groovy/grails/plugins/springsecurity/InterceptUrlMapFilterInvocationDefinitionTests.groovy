@@ -26,7 +26,9 @@ import org.springframework.security.access.SecurityConfig
 import org.springframework.security.access.vote.AuthenticatedVoter
 import org.springframework.security.access.vote.RoleVoter
 import org.springframework.security.web.FilterInvocation
+import org.springframework.security.access.expression.SecurityExpressionHandler
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler
+import org.springframework.security.web.util.AntPathRequestMatcher
 
 /**
  * @author <a href='mailto:burt@burtbeckwith.com'>Burt Beckwith</a>
@@ -47,29 +49,18 @@ class InterceptUrlMapFilterInvocationDefinitionTests extends GroovyTestCase {
 //		_fid.urlMatcher = new AntUrlPathMatcher()
 	}
 
-	void testAfterPropertiesSet() {
-		_fid.urlMatcher = null // simulate not having set it
-
-		assertEquals 'url matcher is required', shouldFail(IllegalArgumentException) {
-			_fid.afterPropertiesSet()
-		}
-
-//		_fid.urlMatcher = new AntUrlPathMatcher()
-
-		_fid.afterPropertiesSet()
-	}
 
 	void testStoreMapping() {
 
 		assertEquals 0, _fid.configAttributeMap.size()
 
-		_fid.storeMapping '/foo/bar', ['ROLE_ADMIN']
+		_fid.storeMapping new AntPathRequestMatcher('/foo/bar'), ['ROLE_ADMIN']
 		assertEquals 1, _fid.configAttributeMap.size()
 
-		_fid.storeMapping '/foo/bar', ['ROLE_USER']
+		_fid.storeMapping new AntPathRequestMatcher('/foo/bar'), ['ROLE_USER']
 		assertEquals 1, _fid.configAttributeMap.size()
 
-		_fid.storeMapping '/other/path', ['ROLE_SUPERUSER']
+		_fid.storeMapping new AntPathRequestMatcher('/other/path'), ['ROLE_SUPERUSER']
 		assertEquals 2, _fid.configAttributeMap.size()
 	}
 
@@ -100,11 +91,11 @@ class InterceptUrlMapFilterInvocationDefinitionTests extends GroovyTestCase {
 		def chain = new MockFilterChain()
 		request.contextPath = '/context'
 
-		request.requestURI = '/context/foo'
+		request.servletPath = '/context/foo'
 		assertEquals '/foo', _fid.determineUrl(new FilterInvocation(request, response, chain))
 
-		request.requestURI = '/context/fOo/Bar?x=1&y=2'
-		assertEquals '/foo/bar', _fid.determineUrl(new FilterInvocation(request, response, chain))
+		request.servletPath = '/context/fOo/Bar?x=1&y=2'
+		assertEquals '/fOo/Bar?x=1&y=2', _fid.determineUrl(new FilterInvocation(request, response, chain))
 	}
 
 	void testSupports() {
@@ -128,7 +119,7 @@ class InterceptUrlMapFilterInvocationDefinitionTests extends GroovyTestCase {
 //		}
 //
 //		def checkConfigAttributeForUrl = {config, String url ->
-//			request.requestURI = url
+//			request.servletPath = url
 //			fid.url = url
 //			assertEquals("Checking config for $url", config, fid.getAttributes(filterInvocation))
 //		}

@@ -105,7 +105,7 @@ public class IpAddressFilter extends GenericFilterBean {
 
 		String uri = (String)request.getAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE);
 		if (!StringUtils.hasLength(uri)) {
-			uri = request.getRequestURI();
+			uri = request.getServletPath();
 			if (!request.getContextPath().equals("/") && uri.startsWith(request.getContextPath())) {
 				uri = uri.substring(request.getContextPath().length());
 			}

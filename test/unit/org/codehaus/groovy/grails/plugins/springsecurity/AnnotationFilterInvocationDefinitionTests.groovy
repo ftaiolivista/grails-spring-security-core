@@ -37,9 +37,12 @@ import org.springframework.security.access.SecurityConfig
 import org.springframework.security.access.vote.AuthenticatedVoter
 import org.springframework.security.access.vote.RoleVoter
 import org.springframework.security.web.FilterInvocation
-import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler
+import org.springframework.security.access.expression.SecurityExpressionHandler
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.security.web.util.AntPathRequestMatcher
+import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler
+import javax.servlet.http.HttpServletRequest
 
 /**
  * Unit tests for AnnotationFilterInvocationDefinition.
@@ -78,163 +81,161 @@ class AnnotationFilterInvocationDefinitionTests extends GroovyTestCase {
 		}
 	}
 
-//	void testGetAttributes() {
-//		def request = new MockHttpServletRequest()
-//		def response = new MockHttpServletResponse()
-//		def chain = new MockFilterChain()
-//		FilterInvocation filterInvocation = new FilterInvocation(request, response, chain)
-//
-//		def matcher = new AntUrlPathMatcher()
-//
-//		_fid = new MockAnnotationFilterInvocationDefinition()
-//		_fid.urlMatcher = matcher
-//
-//		def urlMappingsHolder = [matchAll: { String uri -> [] as UrlMappingInfo[] }] as UrlMappingsHolder
-//		_fid.initialize [:], urlMappingsHolder, [] as GrailsClass[]
-//		WebUtils.storeGrailsWebRequest new GrailsWebRequest(request, response, new MockServletContext())
-//
-//		String pattern = '/foo/**'
-//		def configAttribute = [new SecurityConfig('ROLE_ADMIN')]
-//		_fid.storeMapping matcher.compile(pattern), configAttribute
-//
-//		request.requestURI = '/foo/bar'
-//		_fid.url = request.requestURI
-//		assertEquals configAttribute, _fid.getAttributes(filterInvocation)
-//
-//		_fid.rejectIfNoRule = false
-//		request.requestURI = '/bar/foo'
-//		_fid.url = request.requestURI
-//		assertNull _fid.getAttributes(filterInvocation)
-//
-//		_fid.rejectIfNoRule = true
-//		assertEquals AbstractFilterInvocationDefinition.DENY, _fid.getAttributes(filterInvocation)
-//
-//		String moreSpecificPattern = '/foo/ba*'
-//		def moreSpecificConfigAttribute = [new SecurityConfig('ROLE_SUPERADMIN')]
-//		_fid.storeMapping matcher.compile(moreSpecificPattern), moreSpecificConfigAttribute
-//
-//		request.requestURI = '/foo/bar'
-//		_fid.url = request.requestURI
-//		assertEquals moreSpecificConfigAttribute, _fid.getAttributes(filterInvocation)
-//	}
+	void testGetAttributes() {
+		def request = new MockHttpServletRequest()
+		def response = new MockHttpServletResponse()
+		def chain = new MockFilterChain()
+		FilterInvocation filterInvocation = new FilterInvocation(request, response, chain)
 
-//	void testDetermineUrl_StaticRequest() {
-//		def request = new MockHttpServletRequest()
-//		def response = new MockHttpServletResponse()
-//		def filterChain = new MockFilterChain()
-//
-//		request.requestURI = 'requestURI'
-//
-//		_fid = new MockAnnotationFilterInvocationDefinition()
-//		_fid.urlMatcher = new AntUrlPathMatcher()
-//
-//		def urlMappingsHolder = [matchAll: { String uri -> [] as UrlMappingInfo[] }] as UrlMappingsHolder
-//		_fid.initialize [:], urlMappingsHolder, [] as GrailsClass[]
-//		WebUtils.storeGrailsWebRequest new GrailsWebRequest(request, response, new MockServletContext())
-//
-//		FilterInvocation filterInvocation = new FilterInvocation(request, response, filterChain)
-//
-//		assertEquals 'requesturi', _fid.determineUrl(filterInvocation)
-//	}
+		_fid = new MockAnnotationFilterInvocationDefinition()
 
-//	void testDetermineUrl_DynamicRequest() {
-//		def request = new MockHttpServletRequest()
-//		def response = new MockHttpServletResponse()
-//		def filterChain = new MockFilterChain()
-//
-//		request.requestURI = 'requestURI'
-//
-//		_fid = new MockAnnotationFilterInvocationDefinition(
-//			url: 'FOO?x=1', application: _application,
-//			urlMatcher: new AntUrlPathMatcher())
-//
-//		UrlMappingInfo[] mappings = [[getControllerName: { -> 'foo' },
-//		                              getActionName: { -> 'bar' },
-//		                              configure: { GrailsWebRequest r -> }] as UrlMappingInfo]
-//		def urlMappingsHolder = [matchAll: { String uri -> mappings }] as UrlMappingsHolder
-//		_fid.initialize [:], urlMappingsHolder, [] as GrailsClass[]
-//		WebUtils.storeGrailsWebRequest new GrailsWebRequest(request, response, new MockServletContext())
-//
-//		FilterInvocation filterInvocation = new FilterInvocation(request, response, filterChain)
-//
-//		assertEquals 'foo', _fid.determineUrl(filterInvocation)
-//	}
+		def urlMappingsHolder = [matchAll: { String uri -> [] as UrlMappingInfo[] }] as UrlMappingsHolder
+		_fid.initialize [:], urlMappingsHolder, [] as GrailsClass[]
+		WebUtils.storeGrailsWebRequest new GrailsWebRequest(request, response, new MockServletContext())
 
-//	void testInitialize() {
-//
-//		def mappings = {
-//
-//			"/admin/user/$action?/$id?"(controller: "adminUser")
-//
-//			"/$controller/$action?/$id?" { constraints {} }
-//
-//			"/"(view:"/index")
-//
-//			/**** Error Mappings ****/
-//
-//			"403"(controller: "errors", action: "accessDenied")
-//			"404"(controller: "errors", action: "notFound")
-//			"405"(controller: "errors", action: "notAllowed")
-//			"500"(view: '/error')
-//		}
-//
-//		ServletContext servletContext = new MockServletContext()
-//
-//		def app = new DefaultGrailsApplication()
-//		def beans = [(GrailsApplication.APPLICATION_ID): app]
-//		def ctx = [getBean: { String name, Class<?> c = null -> beans[name] },
-//		           containsBean: { String name -> beans.containsKey(name) } ] as WebApplicationContext
-//		servletContext.setAttribute WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ctx
-//
-//		def mappingEvaluator = new DefaultUrlMappingEvaluator(servletContext)
-//
-//		def urlMappingsHolder = new DefaultUrlMappingsHolder(
-//				mappings.collect { mappingEvaluator.evaluateMappings(mappings) }.flatten())
-//
-//		Map<String, Collection<String>> staticRules = ['/js/admin/**': ['ROLE_ADMIN']]
-//		GrailsClass[] controllerClasses = [new DefaultGrailsControllerClass(ClassAnnotatedController),
-//		                                   new DefaultGrailsControllerClass(MethodAnnotatedController)]
-//
-//		_fid.urlMatcher = new AntUrlPathMatcher()
-//		_fid.roleVoter = new RoleVoter()
-//		_fid.authenticatedVoter = new AuthenticatedVoter()
-//		_fid.expressionHandler = new DefaultWebSecurityExpressionHandler()
-//
-//		_fid.initialize(staticRules, urlMappingsHolder, controllerClasses)
-//
-//		assertEquals 4, _fid.configAttributeMap.size()
-//
-//		def configAttributes
-//
-//		configAttributes = _fid.configAttributeMap['/classannotated/**']
-//		assertEquals 1, configAttributes.size()
-//		assertEquals 'ROLE_ADMIN', configAttributes.iterator().next().attribute
-//
-//		configAttributes = _fid.configAttributeMap['/classannotated/list/**']
-//		assertEquals 2, configAttributes.size()
-//		assertEquals(['ROLE_FOO', 'ROLE_SUPERADMIN'] as Set, configAttributes*.attribute as Set)
-//
-//		configAttributes = _fid.configAttributeMap['/methodannotated/list/**']
-//		assertEquals 1, configAttributes.size()
-//		assertEquals 'ROLE_ADMIN', configAttributes.iterator().next().attribute
-//
-//		configAttributes = _fid.configAttributeMap['/js/admin/**']
-//		assertEquals 1, configAttributes.size()
-//		assertEquals 'ROLE_ADMIN', configAttributes.iterator().next().attribute
-//	}
+		String pattern = '/foo/**'
+		def configAttribute = [new SecurityConfig('ROLE_ADMIN')]
+		_fid.storeMapping new AntPathRequestMatcher(pattern), configAttribute
+
+		request.servletPath = '/foo/bar'
+		_fid.url = request.servletPath
+		assertEquals configAttribute, _fid.getAttributes(filterInvocation)
+
+		_fid.rejectIfNoRule = false
+		request.servletPath = '/bar/foo'
+		_fid.url = request.servletPath
+		assertNull _fid.getAttributes(filterInvocation)
+
+		_fid.rejectIfNoRule = true
+		assertEquals AbstractFilterInvocationDefinition.DENY, _fid.getAttributes(filterInvocation)
+
+		String moreSpecificPattern = '/foo/ba*'
+		def moreSpecificConfigAttribute = [new SecurityConfig('ROLE_SUPERADMIN')]
+		_fid.storeMapping new AntPathRequestMatcher(moreSpecificPattern), moreSpecificConfigAttribute
+
+		request.servletPath = '/foo/bar'
+		_fid.url = request.servletPath
+		assertEquals moreSpecificConfigAttribute, _fid.getAttributes(filterInvocation)
+	}
+
+	void testDetermineUrl_StaticRequest() {
+		def request = new MockHttpServletRequest()
+		def response = new MockHttpServletResponse()
+		def filterChain = new MockFilterChain()
+
+		request.servletPath = 'requestURI'
+
+		_fid = new MockAnnotationFilterInvocationDefinition()
+
+		def urlMappingsHolder = [matchAll: { String uri -> [] as UrlMappingInfo[] }] as UrlMappingsHolder
+		_fid.initialize [:], urlMappingsHolder, [] as GrailsClass[]
+		WebUtils.storeGrailsWebRequest new GrailsWebRequest(request, response, new MockServletContext())
+
+		FilterInvocation filterInvocation = new FilterInvocation(request, response, filterChain)
+
+		assertEquals 'requestURI', _fid.determineUrl(filterInvocation)
+	}
+
+	void testDetermineUrl_DynamicRequest() {
+		def request = new MockHttpServletRequest()
+		def response = new MockHttpServletResponse()
+		def filterChain = new MockFilterChain()
+
+		request.servletPath = 'requestURI'
+
+		_fid = new MockAnnotationFilterInvocationDefinition( url: 'FOO?x=1', application: _application )
+
+		UrlMappingInfo[] mappings = [[getControllerName: { -> 'foo' },
+		                              getActionName: { -> 'bar' },
+		                              configure: { GrailsWebRequest r -> }] as UrlMappingInfo]
+		def urlMappingsHolder = [matchAll: { String uri -> mappings }] as UrlMappingsHolder
+		_fid.initialize [:], urlMappingsHolder, [] as GrailsClass[]
+		WebUtils.storeGrailsWebRequest new GrailsWebRequest(request, response, new MockServletContext())
+
+		FilterInvocation filterInvocation = new FilterInvocation(request, response, filterChain)
+
+		assertEquals 'FOO?x=1', _fid.determineUrl(filterInvocation)
+	}
+
+	void testInitialize() {
+
+		def mappings = {
+
+			"/admin/user/$action?/$id?"(controller: "adminUser")
+
+			"/$controller/$action?/$id?" { constraints {} }
+
+			"/"(view:"/index")
+
+			/**** Error Mappings ****/
+
+			"403"(controller: "errors", action: "accessDenied")
+			"404"(controller: "errors", action: "notFound")
+			"405"(controller: "errors", action: "notAllowed")
+			"500"(view: '/error')
+		}
+
+		ServletContext servletContext = new MockServletContext()
+
+		def app = new DefaultGrailsApplication()
+		def beans = [(GrailsApplication.APPLICATION_ID): app]
+		def ctx = [getBean: { String name, Class<?> c = null -> beans[name] },
+		           containsBean: { String name -> beans.containsKey(name) } ] as WebApplicationContext
+		servletContext.setAttribute WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ctx
+
+		def mappingEvaluator = new DefaultUrlMappingEvaluator(servletContext)
+
+		def urlMappingsHolder = new DefaultUrlMappingsHolder(
+				mappings.collect { mappingEvaluator.evaluateMappings(mappings) }.flatten())
+
+		Map<String, Collection<String>> staticRules = ['/js/admin/**': ['ROLE_ADMIN']]
+		GrailsClass[] controllerClasses = [new DefaultGrailsControllerClass(ClassAnnotatedController),
+		                                   new DefaultGrailsControllerClass(MethodAnnotatedController)]
+
+		_fid.roleVoter = new RoleVoter()
+		_fid.authenticatedVoter = new AuthenticatedVoter()
+		_fid.expressionHandler = new DefaultWebSecurityExpressionHandler()
+
+		_fid.initialize(staticRules, urlMappingsHolder, controllerClasses)
+
+		assertEquals 4, _fid.configAttributeMap.size()
+
+		def configAttributes
+
+		def cam = _fid.configAttributeMap
+		
+		cam.dump()
+		
+		configAttributes = _fid.configAttributeMap[new AntPathRequestMatcher('/classannotated/**')]
+		assertEquals 1, configAttributes.size()
+		assertEquals 'ROLE_ADMIN', configAttributes.iterator().next().attribute
+
+		configAttributes = _fid.configAttributeMap[new AntPathRequestMatcher('/classannotated/list/**')]
+		assertEquals 2, configAttributes.size()
+		assertEquals(['ROLE_FOO', 'ROLE_SUPERADMIN'] as Set, configAttributes*.attribute as Set)
+
+		configAttributes = _fid.configAttributeMap[new AntPathRequestMatcher('/methodannotated/list/**')]
+		assertEquals 1, configAttributes.size()
+		assertEquals 'ROLE_ADMIN', configAttributes.iterator().next().attribute
+
+		configAttributes = _fid.configAttributeMap[new AntPathRequestMatcher('/js/admin/**')]
+		assertEquals 1, configAttributes.size()
+		assertEquals 'ROLE_ADMIN', configAttributes.iterator().next().attribute
+	}
 
 //	void testFindConfigAttribute() {
 //
-//		def matcher = new AntUrlPathMatcher()
-//
-//		_fid.urlMatcher = matcher
-//
 //		String pattern = '/foo/**'
 //		def configAttribute = [new SecurityConfig('ROLE_ADMIN')]
-//		_fid.storeMapping matcher.compile(pattern), configAttribute
+//		_fid.storeMapping new AntPathRequestMatcher(pattern), configAttribute
 //
-//		assertEquals configAttribute, _fid.findConfigAttribute('/foo/bar')
-//		assertNull _fid.findConfigAttribute('/bar/foo')
+//		HttpServletRequest request = new MockHttpServletRequest()
+//		request.servletPath = '/foo/bar'
+//		
+//		assertEquals configAttribute, _fid.findConfigAttribute(request)
+//		
+//		request.servletPath = '/bar/foo'
+//		assertNull _fid.findConfigAttribute(request)
 //	}
 
 	/**
