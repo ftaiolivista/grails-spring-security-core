@@ -284,6 +284,7 @@ class SpringSecurityCoreGrailsPlugin {
 			errorPage = conf.adh.errorPage == 'null' ? null : conf.adh.errorPage // '/login/denied' or 403
 			ajaxErrorPage = conf.adh.ajaxErrorPage
 			portResolver = ref('portResolver')
+			requestCache = ref('requestCache')
 			authenticationTrustResolver = ref('authenticationTrustResolver')
 		}
 

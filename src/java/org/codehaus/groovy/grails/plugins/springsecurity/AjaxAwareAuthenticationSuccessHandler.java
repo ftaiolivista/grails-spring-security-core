@@ -30,7 +30,7 @@ import org.springframework.security.web.savedrequest.RequestCache;
 public class AjaxAwareAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
 	private String _ajaxSuccessUrl;
-	private RequestCache _requestCache;
+	private RequestCache requestCache;
 
 	/**
 	 * {@inheritDoc}
@@ -64,7 +64,7 @@ public class AjaxAwareAuthenticationSuccessHandler extends SavedRequestAwareAuth
 			final Authentication authentication) throws ServletException, IOException {
 		super.onAuthenticationSuccess(request, response, authentication);
 		// always remove the saved request
-		_requestCache.removeRequest(request, response);
+		requestCache.removeRequest(request, response);
 	}
 
 	/**
@@ -73,8 +73,8 @@ public class AjaxAwareAuthenticationSuccessHandler extends SavedRequestAwareAuth
 	 * 	org.springframework.security.web.savedrequest.RequestCache)
 	 */
 	@Override
-	public void setRequestCache(RequestCache requestCache) {
-		super.setRequestCache(requestCache);
-		_requestCache = requestCache;
+	public void setRequestCache(RequestCache theRequestCache) {
+		super.setRequestCache(theRequestCache);
+		requestCache = theRequestCache;
 	}
 }
