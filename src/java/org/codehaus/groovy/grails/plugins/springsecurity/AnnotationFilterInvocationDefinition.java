@@ -45,6 +45,7 @@ import org.springframework.security.web.access.intercept.FilterInvocationSecurit
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.security.web.util.AntPathRequestMatcher;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 /**
  * A {@link FilterInvocationSecurityMetadataSource} that uses rules defined with Controller annotations
@@ -63,7 +64,7 @@ public class AnnotationFilterInvocationDefinition extends AbstractFilterInvocati
 	private GrailsApplication _application;
 
 	@Override
-	protected String determineUrl(final FilterInvocation filterInvocation) {
+	protected HttpServletRequest determineUrl(final FilterInvocation filterInvocation) {
 		HttpServletRequest request = filterInvocation.getHttpRequest();
 		HttpServletResponse response = filterInvocation.getHttpResponse();
 
@@ -101,8 +102,10 @@ public class AnnotationFilterInvocationDefinition extends AbstractFilterInvocati
 			// probably css/js/image
 			url = requestUrl;
 		}
-
-		return url;
+//		System.out.println("DETERMINED URL "+url );
+		MockHttpServletRequest r = new MockHttpServletRequest(request.getServletContext(), request.getMethod(), url);
+		r.setServletPath(url);
+		return r; 		
 	}
 
 	protected String findGrailsUrl(final UrlMappingInfo mapping) {

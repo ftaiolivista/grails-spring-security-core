@@ -20,6 +20,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.web.FilterInvocation;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 /**
  * @author <a href='mailto:burt@burtbeckwith.com'>Burt Beckwith</a>
@@ -29,9 +30,15 @@ public class RequestmapFilterInvocationDefinition extends AbstractFilterInvocati
 	private boolean _initialized;
 
 	@Override
-	protected String determineUrl(final FilterInvocation filterInvocation) {
+	protected HttpServletRequest determineUrl(final FilterInvocation filterInvocation) {
 		HttpServletRequest request = filterInvocation.getHttpRequest();
-		return request.getServletPath().substring(request.getContextPath().length());
+		String url = request.getServletPath().substring(request.getContextPath().length());
+		MockHttpServletRequest r = new MockHttpServletRequest(
+				request.getServletContext(), 
+				request.getMethod(), 
+				url);				
+		r.setServletPath(url);
+		return r; 		
 	}
 
 	@Override

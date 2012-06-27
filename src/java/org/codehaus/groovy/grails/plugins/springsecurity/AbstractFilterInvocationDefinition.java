@@ -76,10 +76,10 @@ public abstract class AbstractFilterInvocationDefinition
 		Assert.isTrue(object != null && supports(object.getClass()), "Object must be a FilterInvocation");
 
 		FilterInvocation filterInvocation = (FilterInvocation)object;
-
+		
 		Collection<ConfigAttribute> configAttributes;
 		try {
-			configAttributes = findConfigAttributes(filterInvocation.getRequest());
+			configAttributes = findConfigAttributes(determineUrl(filterInvocation));
 		}
 		catch (Exception e) {
 			// TODO fix this
@@ -93,7 +93,7 @@ public abstract class AbstractFilterInvocationDefinition
 		return configAttributes;
 	}
 
-	protected abstract String determineUrl(FilterInvocation filterInvocation);
+	protected abstract HttpServletRequest determineUrl(FilterInvocation filterInvocation);
 
 	protected boolean stopAtFirstMatch() {
 		return false;
