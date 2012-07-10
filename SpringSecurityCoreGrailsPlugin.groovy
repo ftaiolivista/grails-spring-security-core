@@ -113,7 +113,7 @@ import org.springframework.security.web.util.AntPathRequestMatcher
  */
 class SpringSecurityCoreGrailsPlugin {
 
-	String version = '1.2.8.0'
+	String version = '1.2.8.4'
 	String grailsVersion = '1.2.2 > *'
 	List observe = ['controllers']
 	List loadAfter = ['controllers', 'services', 'hibernate']
