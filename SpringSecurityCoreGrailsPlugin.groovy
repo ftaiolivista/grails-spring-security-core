@@ -581,7 +581,7 @@ to default to 'Annotation'; setting value to 'Annotation'
 					// explicit filter names
 					filters = value.toString().split(',').collect { name -> ctx.getBean(name) }
 				}
-				filterChainMap[key] = filters
+				filterChainMap[new AntPathRequestMatcher(key)] = filters
 			}
 		}
 		else {
