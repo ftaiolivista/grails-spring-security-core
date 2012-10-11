@@ -6,3 +6,6 @@ stacktrace.log
 /testapps.config.groovy
 /plugin.xml
 target-eclipse
+.classpath
+.project
+.settings
