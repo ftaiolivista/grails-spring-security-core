@@ -10,3 +10,5 @@ web-app
 grails-app/conf/UrlMappings.groovy
 grails-app/i18n/messages.properties
 target-eclipse
+.classpath
+.settings
